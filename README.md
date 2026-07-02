@@ -1,2 +1,40 @@
-# AB-Testing-Conversion-Analysis
-核心工作： 独立主导 A/B 测试数据评估，对 4700+ 用户行为日志进行深度清洗，排查并剔除分流系统引发的脏数据（双重曝光样本），保障 AA 实验严谨性。  统计建模： 运用双比例 Z 检验与独立样本 T 检验（异方差），评估新版本对核心业务指标（转化率 CVR 与人均创收 ARPU）的真实影响，并使用 Seaborn 绘制含 95% 置信区间的可视化图表。  业务洞察： 经测算，虽然新版本绝对指标下跌，但 P-value 均远大于 0.05（CVR p=0.25;ARPU p=0.16）。通过数据驱动得出“结果不具备统计显著性”的结论，成功规避了全量上线可能带来的潜在风险，并向业务方提出了延长观测周期以提升统计功效（Power）的优化建议。
+# 📊 A/B Testing Analysis: Feature Launch Evaluation
+
+## 📖 Project Background
+A company launched a new feature/landing page (Variant) and ran an A/B test against the old version (Control). The goal of this project is to analyze the test results using statistical rigor to determine if the new feature significantly improves **Conversion Rate (CVR)** and **Average Revenue Per User (ARPU)**, and to provide actionable business recommendations.
+
+## 🛠️ Tech Stack
+- **Python:** Data manipulation and analysis (`pandas`, `numpy`).
+- **Statistical Testing:** Hypothesis testing (`scipy.stats`, `statsmodels`).
+- **Data Visualization:** Confidence interval plotting (`matplotlib`, `seaborn`).
+
+## 🧹 Step 1: Data Cleaning & Sanity Check
+Before analyzing the metrics, a sanity check was performed to ensure the integrity of the split test. 
+- Identified and removed users who were mistakenly exposed to **both** Control and Variant groups (Data logging errors).
+- **Final Sample Size:** Control (2,390 users), Variant (2,393 users). The 50/50 split is balanced.
+
+## 📈 Step 2: Key Findings & Statistical Significance
+
+### 1. Conversion Rate (CVR)
+- **Control:** 2.26% | **Variant:** 1.80%
+- **Statistical Test:** Two-Proportion Z-Test
+- **Result:** P-value = 0.2565 (> 0.05)
+- **Conclusion:** The drop in conversion rate is **NOT statistically significant**. We cannot reject the null hypothesis.
+
+![CVR Comparison](cvr_comparison.png)
+
+### 2. Average Revenue Per User (ARPU)
+- **Control:** $0.1969 | **Variant:** $0.0749
+- **Statistical Test:** Welch's T-Test (Independent Samples, Unequal Variance)
+- **Result:** P-value = 0.1605 (> 0.05)
+- **Conclusion:** The difference in ARPU is **NOT statistically significant**.
+
+![ARPU Comparison](arpu_comparison.png)
+
+*Note: The overlapping 95% Confidence Interval error bars in both charts visually confirm the lack of statistical significance.*
+
+## 💡 Step 3: Business Recommendations
+Based on the statistical analysis, I recommend the following:
+1. **Do NOT Rollout:** The Variant group failed to show a significant improvement in either CVR or ARPU. Launching this feature would not yield a positive ROI and might carry unnecessary risk.
+2. **Investigate the Drop:** Although not statistically significant, the absolute numbers dropped. Product managers should review the Variant design to ensure there are no UX frictions or bugs.
+3. **Check Test Duration (Statistical Power):** Ensure the test ran for at least 1-2 full business cycles (e.g., 14 days) to rule out the "novelty effect" and ensure sufficient statistical power before officially closing the experiment.
